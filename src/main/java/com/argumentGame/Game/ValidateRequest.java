@@ -13,6 +13,13 @@ public class ValidateRequest {
 	public int proponentWinCount;
 	public int opponentWinCount;
 	public String gameStart;
+	public String gameType;
+	public String getGameType() {
+		return gameType;
+	}
+	public void setGameType(String gameType) {
+		this.gameType = gameType;
+	}
 	public String getGameStart() {
 		return gameStart;
 	}

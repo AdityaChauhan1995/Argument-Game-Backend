@@ -1,21 +1,25 @@
 package com.argumentGame.Game;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 @RestController
 @CrossOrigin
@@ -110,7 +114,7 @@ public class GameController {
 //			result = 0;
 //		}
 		int validLength = 0;
-		if(gameStart.equalsIgnoreCase("Proponent")) {
+		if(gameStart.equalsIgnoreCase("User")) {
 			validLength = 0;
 		}else {
 			validLength = 1;
@@ -155,6 +159,8 @@ public class GameController {
 	
 	String getWinningStatergy(ArrayList<ArrayList<String>> playedGameTreeList, ArrayList<ArrayList<String>> gameTreeList,String gameStart) {
 		
+		ArrayList<ArrayList<ArrayList<String>>> completeWinningList = getWinningSubtrees(gameTreeList);
+		
 		ArrayList<String> allMatched = new ArrayList<String>();
 		for(ArrayList<String> treeList: playedGameTreeList ) {
 			boolean matched = true;
@@ -176,55 +182,95 @@ public class GameController {
 			}
 			allMatched.add(String.valueOf(matched));
 		}
-		StringBuffer temp  = new StringBuffer();
+		
 		int count =0;
 		int validPropLength = 1, validOppLength = 0;
-		if(gameStart.equalsIgnoreCase("Proponent")) {
+		if(gameStart.equalsIgnoreCase("User")) {
 			validPropLength = 1;
 			validOppLength = 0;
-		}else {
-			validPropLength = 0;
-			validOppLength = 1;
 		}
+//		else {
+//			validPropLength = 0;
+//			validOppLength = 1;
+//		}
+		
+		ArrayList<ArrayList<String>> proWinsList = new ArrayList<ArrayList<String>>();
+		
 		for(ArrayList<String> gameList:playedGameTreeList) {
 			if(gameList.size()%2 == validPropLength && allMatched.get(count).equalsIgnoreCase("true")) {
-				if(!temp.isEmpty()) {
-					temp.append("      ;      ");
-				}else {
-					temp.append("Winning Statergy for proponent is :");
-				}
-				for(int i=0;i<gameList.size();i++) {
-					temp.append(gameList.get(i));
-					if(i != gameList.size()-1) {
-						temp.append("-->");
-					}
-				}
+				proWinsList.add(gameList);
 			}
 			count++;
 		}
-		StringBuffer temp2  = new StringBuffer();
-		count =0;
-		for(ArrayList<String> gameList:playedGameTreeList) {
-			if(gameList.size()%2 == validOppLength && allMatched.get(count).equalsIgnoreCase("true")) {
-				if(!temp2.isEmpty()) {
-					temp2.append("      ;      ");
-				}else {
-					temp2.append("     and Winning Statergy for opponent is :");
-				}
-				for(int i=0;i<gameList.size();i++) {
-					temp2.append(gameList.get(i));
-					if(i != gameList.size()-1) {
-						temp2.append("-->");
+		
+		ArrayList<Boolean> completeListMatchedList = new ArrayList<Boolean>(); 
+		
+		boolean result = true;
+		ArrayList<Boolean> winningListMatched = new ArrayList<Boolean>();
+		for(int j=0;j<completeWinningList.size();j++) {
+			result = true;
+			ArrayList<ArrayList<String>> winList = completeWinningList.get(j);
+			ArrayList<Boolean> allMatchedList = new ArrayList<Boolean>();
+			for(int i=0;i<winList.size();i++) {
+				boolean matched=true;
+				for(int k=0;k<proWinsList.size();k++) {
+					matched=true;
+					if(winList.get(i).size()==proWinsList.get(k).size()) {
+						for(int l=0;l<winList.get(i).size();l++) {
+							if(!proWinsList.get(k).get(l).split("\\(")[0].equalsIgnoreCase(winList.get(i).get(l))) {
+								matched=false;
+								break;
+							}
+						}
+					}else {
+						matched=false;
+					}
+					if(matched) {
+						break;
 					}
 				}
+				allMatchedList.add(matched);
 			}
-			count++;
+			for(boolean value:allMatchedList) {
+				if(!value) {
+					result = false;
+					break;
+				}
+			}
+			winningListMatched.add(result);
 		}
-		temp.append(temp2.toString());
+		
+		StringBuffer temp  = new StringBuffer();
+		int number = 0;
+		for(int i=0;i<winningListMatched.size();i++) {
+			if(temp.isEmpty()) {
+				temp.append("\nWinning Statergy for proponent is :-");
+			}	
+			if(winningListMatched.get(i)) {
+				ArrayList<ArrayList<String>> winList = completeWinningList.get(i);
+				temp.append("\n" + (number+1) + ")   ");
+				number++;
+				int index =0;
+				for(ArrayList<String> gameList:winList) {
+					for(int j=0;j<gameList.size();j++) {
+						temp.append(gameList.get(j));
+						if(j != gameList.size()-1) {
+							temp.append("-->");
+						}
+					}
+					if(index != winList.size()-1) {
+						temp.append("     ;     ");
+					}
+					index++;
+				}
+			}
+		}
+		
 		return temp.toString();
 	}
 	
-	String getMessage(ArrayList<ArrayList<String>>playedGameTreeList ,ArrayList<ArrayList<String>> gameTreeList,int opponentWinCount,int proponentWinCount, String gameStart) {
+	String getMessage(ArrayList<ArrayList<String>>playedGameTreeList ,ArrayList<ArrayList<String>> gameTreeList,int opponentWinCount
+						,int proponentWinCount, String gameStart,ArrayList<ArrayList<ArrayList<String>>> completeWinningList) {
 		int newOpponentWinCount = 0;
 		int newProponentWinCount = 0;
 		ArrayList<String> allMatched = new ArrayList<String>();
@@ -249,18 +295,21 @@ public class GameController {
 			allMatched.add(String.valueOf(matched));
 		}
 		int validPropLength = 1, validOppLength = 0;
-		if(gameStart.equalsIgnoreCase("Proponent")) {
+		if(gameStart.equalsIgnoreCase("User")) {
 			validPropLength = 1;
 			validOppLength = 0;
-		}else {
-			validPropLength = 0;
-			validOppLength = 1;
 		}
+//		else {
+//			validPropLength = 0;
+//			validOppLength = 1;
+//		}
 		
 		int index = 0;
+		ArrayList<ArrayList<String>> proWins = new ArrayList<ArrayList<String>>(); 
 		for(String r:allMatched) {
 			if(r.equalsIgnoreCase("true") && playedGameTreeList.get(index).size()%2 == validPropLength) {
 				newProponentWinCount++;
+				proWins.add(playedGameTreeList.get(index));
 			}else if(r.equalsIgnoreCase("true") && playedGameTreeList.get(index).size()%2 == validOppLength) {
 				newOpponentWinCount++;
 			}
@@ -268,15 +317,69 @@ public class GameController {
 		}
 		String message = null;
 		if(newProponentWinCount>proponentWinCount) {
-			message = "Proponent Wins !";
-		}else if(newOpponentWinCount>opponentWinCount) {
-			message = "Opponent Wins !";
+			boolean result = compareCompleteWinningStratergy(proWins,completeWinningList);
+//			System.out.println("Result of compareCompleteWinningStratergy : " + String.valueOf(result));
+			if(result) {
+				message = "Proponent Wins !!!";
+			}else {
+				message = "null";
+			}
+		}
+		else if(newOpponentWinCount>opponentWinCount) {
+//			message = "Opponent Wins !";
+			message = "null";
 		}
 		if(message != null) {
 			return message+";"+newProponentWinCount+";"+newOpponentWinCount;
 		}else {
 			return message;
 		}
+	}
+	
+	boolean compareCompleteWinningStratergy(ArrayList<ArrayList<String>> proWins,ArrayList<ArrayList<ArrayList<String>>> completeWinningList) {
+		
+		boolean result = true;
+		ArrayList<Boolean> winningListMatched = new ArrayList<Boolean>();
+		for(int j=0;j<completeWinningList.size();j++) {
+			result = true;
+			ArrayList<ArrayList<String>> winList = completeWinningList.get(j);
+			ArrayList<Boolean> allMatched = new ArrayList<Boolean>();
+			for(int i=0;i<winList.size();i++) {
+				boolean matched=true;
+				for(int k=0;k<proWins.size();k++) {
+					matched=true;
+					if(winList.get(i).size()==proWins.get(k).size()) {
+						for(int l=0;l<winList.get(i).size();l++) {
+							if(!proWins.get(k).get(l).split("\\(")[0].equalsIgnoreCase(winList.get(i).get(l))) {
+								matched=false;
+								break;
+							}
+						}
+					}else {
+						matched=false;
+					}
+					if(matched) {
+						break;
+					}
+				}
+				allMatched.add(matched);
+			}
+			for(boolean value:allMatched) {
+				if(!value) {
+					result = false;
+					break;
+				}
+			}
+			winningListMatched.add(result);
+		}
+		result = false;
+		for(boolean value:winningListMatched) {
+			if(value) {
+				result = true;
+				break;
+			}
+		}
+		return result;
 	}
 	
 	String getNodeCount(String nextNode,ArrayList<Nodes> nodes ) {
@@ -297,7 +400,9 @@ public class GameController {
 	boolean isSublistAlreadyPresent(ArrayList<String> subList,String tempNextNode,ArrayList<ArrayList<String>> playedGameTreeList) {
 		
 		ArrayList<String> tempSubList = new ArrayList<String>(subList);
-		tempSubList.add(tempNextNode);
+		if(tempNextNode != null) {
+			tempSubList.add(tempNextNode);
+		}
 		boolean matched = true;
 		for(ArrayList<String> treeList: playedGameTreeList ) {
 			matched = true;
@@ -327,7 +432,7 @@ public class GameController {
 		boolean resultObtained = false;
 		int count = 0;
 		int validLength = 1, validLength2 = 0;
-		if(gameStart.equalsIgnoreCase("Proponent")) {
+		if(gameStart.equalsIgnoreCase("User")) {
 			validLength = 1;
 			validLength2 = 0;
 		}else {
@@ -430,9 +535,9 @@ public class GameController {
 							break;
 						}
 					}
-					if(subList.size() == 1 && gameStart.equalsIgnoreCase("Proponent")) {
+					if(subList.size() == 1 && gameStart.equalsIgnoreCase("User")) {
 						break;
-					}else if(subList.size() == 2 && gameStart.equalsIgnoreCase("Opponent")) {
+					}else if(subList.size() == 2 && gameStart.equalsIgnoreCase("Computer")) {
 						break;
 					}else if(subList.size()%2 == validLength2) {
 						tempNextNode = subList.get(subList.size()-1);
@@ -504,19 +609,306 @@ public class GameController {
 		return playedGameTreeList;
 	}
 	
+	ArrayList<ArrayList<ArrayList<String>>> getWinningSubtrees(ArrayList<ArrayList<String>> gameTreeList){
+		
+//		gameTreeList = new ArrayList<ArrayList<String>>();
+//		ArrayList<String> example1 = new ArrayList<String>(Arrays.asList("3","4","7"));
+//		ArrayList<String> example2 = new ArrayList<String>(Arrays.asList("3","1","5"));
+//		ArrayList<String> example3 = new ArrayList<String>(Arrays.asList("3","2","3","5"));
+//		ArrayList<String> example4 = new ArrayList<String>(Arrays.asList("3","2","4","1","6"));
+//		ArrayList<String> example5 = new ArrayList<String>(Arrays.asList("3","1","3","5","8","6"));
+//		ArrayList<String> example6 = new ArrayList<String>(Arrays.asList("3","1","3","5","1","7"));
+//		ArrayList<String> example7 = new ArrayList<String>(Arrays.asList("3","1","3","2","3","5","4"));
+//		ArrayList<String> example8 = new ArrayList<String>(Arrays.asList("3","1","3","2","3","6","7"));
+//		gameTreeList.add(example1);
+//		gameTreeList.add(example2);
+//		gameTreeList.add(example3);
+//		gameTreeList.add(example4);
+//		gameTreeList.add(example5);
+//		gameTreeList.add(example6);
+//		gameTreeList.add(example7);
+//		gameTreeList.add(example8);
+		
+		ArrayList<ArrayList<String>> winningSubTrees = helperWinningSubTrees(gameTreeList);
+		
+		ArrayList<ArrayList<ArrayList<String>>> completeWinningList = new ArrayList<ArrayList<ArrayList<String>>>();
+		ArrayList<ArrayList<String>> temp = new ArrayList<ArrayList<String>>();
+		int index=0;
+		for(ArrayList<String> winningSub:winningSubTrees) {
+			String tempNextNode = winningSub.get(winningSub.size()-2);
+			ArrayList<String> winShortList = new ArrayList<String>(winningSub.subList(0, winningSub.size()-2));
+			ArrayList<ArrayList<ArrayList<String>>> tempCompleteWinningList = new ArrayList<ArrayList<ArrayList<String>>>();
+			temp = new ArrayList<ArrayList<String>>();
+			temp.add(winningSub);
+			completeWinningList.add(temp);
+			tempCompleteWinningList.add(temp);
+			while(winShortList.size()>0) {
+				ArrayList<ArrayList<ArrayList<String>>> tempMatchedSubList = new ArrayList<ArrayList<ArrayList<String>>>();
+				Map<String,Integer> map = new HashMap<String, Integer>();
+				for(ArrayList<String> tempWinningSub:winningSubTrees) {
+					boolean matched = true;
+					if(winShortList.size()<tempWinningSub.size()) {
+						for(int i=0;i<winShortList.size();i++) {
+							if(!winShortList.get(i).equalsIgnoreCase(tempWinningSub.get(i))) {
+								matched = false;
+								break;
+							}
+						}
+					}else {
+						matched=false;
+					}
+					if(matched && !tempNextNode.equalsIgnoreCase(tempWinningSub.get(winShortList.size()))) {
+						if(map.get(tempWinningSub.get(winShortList.size())) == null) {
+							map.put(tempWinningSub.get(winShortList.size()), map.size());
+						}
+						int z = map.get(tempWinningSub.get(winShortList.size()));
+						if(tempMatchedSubList.isEmpty()) {
+							ArrayList<ArrayList<String>> tempList = new ArrayList<ArrayList<String>>();
+							tempList.add(tempWinningSub);
+							tempMatchedSubList.add(tempList);
+						}else {
+							if(tempMatchedSubList.size()-1<z) {
+								ArrayList<ArrayList<String>> tempList = new ArrayList<ArrayList<String>>();
+								tempList.add(tempWinningSub);
+								tempMatchedSubList.add(tempList);
+							}else {
+								tempMatchedSubList.get(z).add(tempWinningSub);
+							}
+						}
+//						tempMatchedSubList.add(tempWinningSub);
+//						ArrayList<String> tempWinShortList = new ArrayList<String>(winShortList);
+//						tempWinShortList.add(tempNextNode);
+//						ArrayList<String> tempWinningSub2 = new ArrayList<String>(tempWinningSub.subList(0, winShortList.size()+1));
+//						completeWinningList = addInCompleteWinningList(completeWinningList,index,tempWinShortList,tempWinningSub2);
+					}
+				}
+				if(!tempMatchedSubList.isEmpty()) {
+					for(ArrayList<ArrayList<String>> tempMatchedSub:tempMatchedSubList) {
+						tempCompleteWinningList = addInCompleteWinningList(tempCompleteWinningList,tempMatchedSub);
+					}
+				}
+				if(winShortList.size() == 1) {
+					break;
+				}
+				tempNextNode = winShortList.get(winShortList.size()-2);
+				winShortList = new ArrayList<String>(winShortList.subList(0, winShortList.size()-2));
+			}
+			completeWinningList.addAll(tempCompleteWinningList);
+			index++;
+		}
+		completeWinningList = removeDuplicate(completeWinningList);
+		return completeWinningList;
+
+	}
+	
+	ArrayList<ArrayList<String>> helperWinningSubTrees(ArrayList<ArrayList<String>> gameTreeList){
+		ArrayList<ArrayList<String>> proWinGames = new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<String>> oppWinGames = new ArrayList<ArrayList<String>>();
+		Set<String> oppFirstMoves = new HashSet<String>();
+		for(ArrayList<String> treeList:gameTreeList) {
+//		for(ArrayList<String> treeList:tempGameTreeList) {
+			if(treeList.size()%2 == 1) {
+				proWinGames.add(treeList);
+			}else {
+				oppWinGames.add(treeList);
+			}
+			oppFirstMoves.add(treeList.get(1));
+		}
+		ArrayList<ArrayList<String>> excludedSubTrees = new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<String>> winningSubTrees = new ArrayList<ArrayList<String>>();
+		int loopCount = 10;
+		for(int z=0;z<loopCount;z++) {
+			winningSubTrees = new ArrayList<ArrayList<String>>();
+			for(ArrayList<String> proWin:proWinGames) {
+				boolean toBeIncluded = true;
+				if(proWin.size()==3) {
+					winningSubTrees.add(proWin);
+					continue;
+				}else {
+					int index = proWin.size()-1;
+					String tempNextNode = proWin.get(proWin.size()-2);
+					ArrayList<String> proSubList = new ArrayList<String>(proWin.subList(0, proWin.size()-2));
+					while(proSubList.size()>1) {
+						for(ArrayList<String> oppWin:oppWinGames) {
+							boolean matched = true;
+							if(oppWin.size()>=proSubList.size()) {
+								for(int i=0;i<proSubList.size();i++) {
+									if(!proSubList.get(i).equalsIgnoreCase(oppWin.get(i))) {
+										matched = false;
+										break;
+									}
+								}
+							}else {
+								matched = false;
+							}
+							if(matched && !oppWin.get(proSubList.size()).equalsIgnoreCase(tempNextNode)) {
+								if(!isSublistAlreadyPresent(proSubList, oppWin.get(proSubList.size()), proWinGames)) {
+//								if(branchLeadsToOpponentWins(proSubList, oppWin.get(proSubList.size()), proWinGames,excludedSubTrees)) {	
+									toBeIncluded = false;
+									break;
+								}
+							}
+						}
+						tempNextNode = proSubList.get(proSubList.size()-2);
+						proSubList = new ArrayList<String>(proSubList.subList(0, proSubList.size()-2));
+					}
+					if(toBeIncluded) {
+						winningSubTrees.add(proWin);
+					}else {
+						excludedSubTrees.add(proWin);
+					}
+				}
+			}
+			
+			ArrayList<Integer> removeIndex = new ArrayList<Integer>();
+			for(int i=proWinGames.size();i<proWinGames.size();i++) {
+				ArrayList<String> proWin = proWinGames.get(i);
+				for(ArrayList<String> excludedSub:excludedSubTrees) {
+					if(proWin.equals(excludedSub)) {
+						removeIndex.add(i);
+						break;
+					}
+				}
+			}
+			
+			for(int i = 0; i < removeIndex.size(); i++){
+				proWinGames.remove(removeIndex.get(i));
+			}
+			
+			if(removeIndex.isEmpty()) {
+				break;
+			}else if(z==9) {
+				loopCount++;
+			}
+		}
+		
+		
+		for(int j=0;j<winningSubTrees.size();j++) {
+			oppFirstMoves.remove(winningSubTrees.get(j).get(1));
+		}
+		if(!oppFirstMoves.isEmpty()) {
+			winningSubTrees = new ArrayList<ArrayList<String>>();
+		}
+		
+		return winningSubTrees;
+	}
+	
+	ArrayList<ArrayList<ArrayList<String>>> removeDuplicate(ArrayList<ArrayList<ArrayList<String>>> completeWinningList){
+		
+		for(int i=0;i<completeWinningList.size();i++) {
+			ArrayList<ArrayList<String>> winList = completeWinningList.get(i);
+			ArrayList<Integer> removeIndexes = new ArrayList<Integer>();
+			for(int j=winList.size()-1;j>=0;j--) {
+				boolean present = true;
+				for(int k=j-1;k>=0;k--) {
+					present = true;
+					if(winList.get(j).size()<=winList.get(k).size()) {
+						for(int l=0;l<winList.get(j).size();l++) {
+							if(!winList.get(j).get(l).equalsIgnoreCase(winList.get(k).get(l))) {
+								present = false;
+								break;
+							}
+						}
+					}else {
+						present = false;
+					}
+					if(present) {
+						break;
+					}
+				}
+				if(present) {
+					removeIndexes.add(j);
+				}
+			}
+			if(!removeIndexes.isEmpty()) {
+				for(int z = 0; z < removeIndexes.size(); z++){
+					winList.remove(removeIndexes.get(z));
+				}
+			}
+		}
+		
+		ArrayList<ArrayList<ArrayList<String>>> tempCompleteWinningList = new ArrayList<ArrayList<ArrayList<String>>>();
+		ArrayList<Boolean> remove = new ArrayList<Boolean>();
+		for(int i=0;i<completeWinningList.size();i++) {
+			ArrayList<ArrayList<String>> winList = completeWinningList.get(i);
+			ArrayList<Boolean> allMatched = new ArrayList<Boolean>();
+			boolean removeList = false;
+			for(int j=i+1;j<completeWinningList.size();j++) {
+				ArrayList<ArrayList<String>> tempWinList = completeWinningList.get(j);
+				allMatched = new ArrayList<Boolean>();
+				for(ArrayList<String> win:winList) {
+					boolean matched = false;
+					for(ArrayList<String> temp:tempWinList) {
+						if(win.equals(temp)) {
+							matched = true;
+							break;
+						}
+					}
+					allMatched.add(matched);
+				}
+				for(boolean value:allMatched) {
+					if(!value) {
+						removeList = false;
+						break;
+					}else {
+						removeList = true;
+					}
+				}
+				if(removeList) {
+					break;
+				}
+			}
+			remove.add(removeList);
+		}
+		
+		for(int i=0;i<remove.size();i++) {
+			if(!remove.get(i)) {
+				tempCompleteWinningList.add(completeWinningList.get(i));
+			}
+		}
+		return tempCompleteWinningList;
+		
+	}
+	
+	ArrayList<ArrayList<ArrayList<String>>> addInCompleteWinningList(ArrayList<ArrayList<ArrayList<String>>> tempCompleteWinningList,ArrayList<ArrayList<String>> tempMatchedSubList){
+		
+		int matchedLength = tempMatchedSubList.size();
+		int completeListLength = tempCompleteWinningList.size();
+		ArrayList<ArrayList<ArrayList<String>>> tempList = new ArrayList<ArrayList<ArrayList<String>>>();
+		ArrayList<ArrayList<ArrayList<String>>> tempList2 = new ArrayList<ArrayList<ArrayList<String>>>(tempCompleteWinningList);
+		for(int i=0;i<matchedLength-1;i++) {
+			tempList = new ArrayList<ArrayList<ArrayList<String>>>();
+			for(ArrayList<ArrayList<String>> temp:tempList2) {
+				ArrayList<ArrayList<String>> newTemp = new ArrayList<ArrayList<String>>(temp);
+				tempList.add(newTemp);
+			}
+			tempCompleteWinningList.addAll(tempList);
+		}
+		int index = -1;
+		for(int i=0;i<tempCompleteWinningList.size();i++) {
+			if(i%completeListLength == 0) {
+				index++;
+			}
+
+			tempCompleteWinningList.get(i).add(tempMatchedSubList.get(index));
+		}
+		
+		return tempCompleteWinningList;
+	}
+	
 	@RequestMapping(path= "/", method = RequestMethod.GET)
 	public String getList() {
 //		String sql = "SELECT count(*) FROM `argument-games-db`.`argument-game-table`";
 //		int result = jdbcTemplate.queryForObject(sql, Integer.class);
-		String nodeJson = "[{\"width\":150,\"height\":42,\"id\":\"1\",\"data\":{\"label\":\"Node 1\"},\"position\":{\"x\":86.00000000000006,\"y\":129.99999999999994},\"positionAbsolute\":{\"x\":86.00000000000006,\"y\":129.99999999999994},\"selected\":true,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"2\",\"data\":{\"label\":\"Node 2\"},\"position\":{\"x\":251.99999999999991,\"y\":53.00000000000003},\"positionAbsolute\":{\"x\":251.99999999999991,\"y\":53.00000000000003},\"selected\":false,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"3\",\"position\":{\"x\":162.67434199207776,\"y\":249.99999999999997},\"data\":{\"label\":\"Node 3\"},\"positionAbsolute\":{\"x\":162.67434199207776,\"y\":249.99999999999997},\"selected\":false,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"4\",\"position\":{\"x\":445.90017163032684,\"y\":-30.99999999999995},\"data\":{\"label\":\"Node 4\"},\"positionAbsolute\":{\"x\":445.90017163032684,\"y\":-30.99999999999995},\"selected\":false,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"5\",\"position\":{\"x\":-90.10046317682334,\"y\":207.99999999999997},\"data\":{\"label\":\"Node 5\"},\"positionAbsolute\":{\"x\":-90.10046317682334,\"y\":207.99999999999997},\"selected\":false,\"dragging\":false}]";
-		String edgesJson = "[{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"id\":\"e2-1\",\"source\":\"2\",\"target\":\"1\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"4\",\"sourceHandle\":null,\"target\":\"2\",\"targetHandle\":null,\"id\":\"reactflow__edge-4-2\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"1\",\"sourceHandle\":null,\"target\":\"5\",\"targetHandle\":null,\"id\":\"reactflow__edge-1-5\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"1\",\"sourceHandle\":null,\"target\":\"3\",\"targetHandle\":null,\"id\":\"reactflow__edge-1-3\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"3\",\"sourceHandle\":null,\"target\":\"1\",\"targetHandle\":null,\"id\":\"reactflow__edge-3-1\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"3\",\"sourceHandle\":null,\"target\":\"2\",\"targetHandle\":null,\"id\":\"reactflow__edge-3-2\"}]";
-		String sql = "INSERT INTO `argument-games-db`.`argument-game-table` (NodesJson, EdgesJson, Nodes, Edges) VALUES (" + 
-					 "'" + nodeJson + "', " + "'" + edgesJson + "',null,null)";
-		
-		int result = jdbcTemplate.update(sql);
-		String sql1 = "TRUNCATE `argument-games-db`.`argument-game-table` ";
-		jdbcTemplate.execute(sql1);
-		return String.valueOf(result);
+//		String nodeJson = "[{\"width\":150,\"height\":42,\"id\":\"1\",\"data\":{\"label\":\"Node 1\"},\"position\":{\"x\":86.00000000000006,\"y\":129.99999999999994},\"positionAbsolute\":{\"x\":86.00000000000006,\"y\":129.99999999999994},\"selected\":true,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"2\",\"data\":{\"label\":\"Node 2\"},\"position\":{\"x\":251.99999999999991,\"y\":53.00000000000003},\"positionAbsolute\":{\"x\":251.99999999999991,\"y\":53.00000000000003},\"selected\":false,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"3\",\"position\":{\"x\":162.67434199207776,\"y\":249.99999999999997},\"data\":{\"label\":\"Node 3\"},\"positionAbsolute\":{\"x\":162.67434199207776,\"y\":249.99999999999997},\"selected\":false,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"4\",\"position\":{\"x\":445.90017163032684,\"y\":-30.99999999999995},\"data\":{\"label\":\"Node 4\"},\"positionAbsolute\":{\"x\":445.90017163032684,\"y\":-30.99999999999995},\"selected\":false,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"5\",\"position\":{\"x\":-90.10046317682334,\"y\":207.99999999999997},\"data\":{\"label\":\"Node 5\"},\"positionAbsolute\":{\"x\":-90.10046317682334,\"y\":207.99999999999997},\"selected\":false,\"dragging\":false}]";
+//		String edgesJson = "[{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"id\":\"e2-1\",\"source\":\"2\",\"target\":\"1\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"4\",\"sourceHandle\":null,\"target\":\"2\",\"targetHandle\":null,\"id\":\"reactflow__edge-4-2\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"1\",\"sourceHandle\":null,\"target\":\"5\",\"targetHandle\":null,\"id\":\"reactflow__edge-1-5\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"1\",\"sourceHandle\":null,\"target\":\"3\",\"targetHandle\":null,\"id\":\"reactflow__edge-1-3\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"3\",\"sourceHandle\":null,\"target\":\"1\",\"targetHandle\":null,\"id\":\"reactflow__edge-3-1\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"3\",\"sourceHandle\":null,\"target\":\"2\",\"targetHandle\":null,\"id\":\"reactflow__edge-3-2\"}]";
+//		String sql = "INSERT INTO `argument-games-db`.`argument-game-table` (NodesJson, EdgesJson, Nodes, Edges) VALUES (" + 
+//					 "'" + nodeJson + "', " + "'" + edgesJson + "',null,null)";
+//		
+//		int result = jdbcTemplate.update(sql);
+//		String sql1 = "TRUNCATE `argument-games-db`.`argument-game-table` ";
+//		jdbcTemplate.execute(sql1);
+		return String.valueOf(101);
 	}
 	
 	@RequestMapping(path= "/getInitialMap", method = RequestMethod.GET)
@@ -580,7 +972,7 @@ public class GameController {
 		String initialNode = value.getInitialNode();
 		String gameStart = value.getGameStart();
 		int x = 1, position = 1;
-		if(gameStart.equalsIgnoreCase("Proponent")) {
+//		if(gameStart.equalsIgnoreCase("User")) {
 			if(value.getGameType().equalsIgnoreCase("Preferred")) {
 				x=0;
 				position = 1;
@@ -588,15 +980,16 @@ public class GameController {
 				x=1;
 				position = 0;
 			}
-		}else {
-			if(value.getGameType().equalsIgnoreCase("Preferred")) {
-				x=1;
-				position = 0;
-			}else if(value.getGameType().equalsIgnoreCase("Grounded")) {
-				x=0;
-				position = 1;
-			}
-		}
+//		}
+//		else {
+//			if(value.getGameType().equalsIgnoreCase("Preferred")) {
+//				x=1;
+//				position = 0;
+//			}else if(value.getGameType().equalsIgnoreCase("Grounded")) {
+//				x=0;
+//				position = 1;
+//			}
+//		}
 		
 		
 		ArrayList<String> firstRow = new ArrayList<String>();
@@ -655,6 +1048,7 @@ public class GameController {
 			index++;
 		}
 		aList = sortListOfList(aList,"asc");
+		ArrayList<ArrayList<ArrayList<String>>> completeWinningList = getWinningSubtrees(aList);
 		return ResponseEntity.status(HttpStatus.OK).body(aList);
 	}
 	
@@ -665,9 +1059,12 @@ public class GameController {
 		String initialNode = validateRequest.getInitialNode();
 		String lastNodeAdded = validateRequest.getLastAddedNode();
 		String gameStart = validateRequest.getGameStart();
+		String gameType = validateRequest.getGameType();
 		ArrayList<ArrayList<String>> gameTreeList = validateRequest.getGameTreeList();
 		int proponentWinCount = validateRequest.getProponentWinCount();
 		int opponentWinCount = validateRequest.getOpponentWinCount();
+		
+		ArrayList<ArrayList<ArrayList<String>>> completeWinningList = getWinningSubtrees(gameTreeList);
 		
 		ArrayList<ArrayList<String>> playedGameTreeList = new ArrayList<ArrayList<String>>();
 		
@@ -691,9 +1088,14 @@ public class GameController {
 		if(result == -1 && lengthMatched) {
 			validateResponse.setResult(true);
 			validateResponse.setWin("Game Over");
-			String message = getMessage(playedGameTreeList,gameTreeList,opponentWinCount, proponentWinCount,gameStart);
-			if(message != null) {
-				validateResponse.setMessage(message.split(";")[0] + " and Game Finished with " + getWinningStatergy(playedGameTreeList,gameTreeList,gameStart));
+			String message = getMessage(playedGameTreeList,gameTreeList,opponentWinCount, proponentWinCount,gameStart,completeWinningList);
+			if(message != null && !message.split(";")[0].equalsIgnoreCase("null")) {
+				validateResponse.setMessage(message.split(";")[0] + " and Game Finished \n"+ "Node " +initialNode +" will be included in " 
+											+ gameType + " game.\n" + getWinningStatergy(playedGameTreeList,gameTreeList,gameStart));
+				validateResponse.setProponentWinCount(Integer.valueOf(message.split(";")[1]));
+				validateResponse.setOpponentWinCount(Integer.valueOf(message.split(";")[2]));
+			}else if(message != null && message.split(";")[0].equalsIgnoreCase("null")) {
+				validateResponse.setMessage(null);
 				validateResponse.setProponentWinCount(Integer.valueOf(message.split(";")[1]));
 				validateResponse.setOpponentWinCount(Integer.valueOf(message.split(";")[2]));
 			}
@@ -715,18 +1117,24 @@ public class GameController {
 			}else {
 				validateResponse.setWin("Game Won");
 			}
-			String message = getMessage(playedGameTreeList,gameTreeList,opponentWinCount, proponentWinCount,gameStart);
-			if(message != null) {
+			String message = getMessage(playedGameTreeList,gameTreeList,opponentWinCount, proponentWinCount,gameStart,completeWinningList);
+			if(message != null && !message.split(";")[0].equalsIgnoreCase("null")) {
 				boolean lengthEqual = compareLength(gameTreeList,playedGameTreeList);
 				if(lengthEqual) {
-					validateResponse.setMessage(message.split(";")[0] + " and Game Finished with " + getWinningStatergy(playedGameTreeList,gameTreeList,gameStart));
+					validateResponse.setMessage(message.split(";")[0] + " and Game Finished \n"+ "Node " +initialNode +" will be included in "
+																	+ gameType + " game.\n" +  getWinningStatergy(playedGameTreeList,gameTreeList,gameStart));
 					validateResponse.setProponentWinCount(Integer.valueOf(message.split(";")[1]));
 					validateResponse.setOpponentWinCount(Integer.valueOf(message.split(";")[2]));
 				}else {
-					validateResponse.setMessage(message.split(";")[0] + getWinningStatergy(playedGameTreeList,gameTreeList,gameStart));
+					validateResponse.setMessage(message.split(";")[0] + "\n"+ "Node " +initialNode +" will be included in "
+													+ gameType + " game.\n" +  getWinningStatergy(playedGameTreeList,gameTreeList,gameStart));
 					validateResponse.setProponentWinCount(Integer.valueOf(message.split(";")[1]));
 					validateResponse.setOpponentWinCount(Integer.valueOf(message.split(";")[2]));
 				}
+			}else if(message != null && message.split(";")[0].equalsIgnoreCase("null")) {
+				validateResponse.setMessage(null);
+				validateResponse.setProponentWinCount(Integer.valueOf(message.split(";")[1]));
+				validateResponse.setOpponentWinCount(Integer.valueOf(message.split(";")[2]));
 			}
 		}else if(result != -1 ) {
 			validateResponse.setResult(false);
@@ -760,7 +1168,7 @@ public class GameController {
 		playedGameTreeList = sortListOfList(playedGameTreeList,"desc");
 		
 		int validLength = 1, validLength2 =0;
-		if(gameStart.equalsIgnoreCase("Proponent")) {
+		if(gameStart.equalsIgnoreCase("User")) {
 			validLength = 1;
 			validLength2 =0;
 		}else {
@@ -770,12 +1178,12 @@ public class GameController {
 		
 		ArrayList<ArrayList<String>> tempGameTreeList = new ArrayList<ArrayList<String>>();
 		for(ArrayList<String> tempList: gameTreeList) {
-			if(tempList.size()%2 == validLength) {
+			if(tempList.size()%2 == 1) {
 				tempGameTreeList.add(tempList);
 			}
 		}
 		for(ArrayList<String> tempList: gameTreeList) {
-			if(tempList.size()%2 == validLength2) {
+			if(tempList.size()%2 == 0) {
 				tempGameTreeList.add(tempList);
 			}
 		}
@@ -789,7 +1197,7 @@ public class GameController {
 		ArrayList<String> tempTreeList = new ArrayList<String>();
 		boolean resultObtained = false;
 		for(ArrayList<String> gameList: gameTreeList ) {
-			if(gameList.size() == 2 && gameStart.equalsIgnoreCase("Proponent")) {
+			if(gameList.size() == 2 && gameStart.equalsIgnoreCase("User")) {
 				continue;
 			}else if(gameList.size()%2 == validLength) {
 				tempNextNode = gameList.get(gameList.size()-1);
@@ -802,17 +1210,21 @@ public class GameController {
 				boolean matched = true;
 				for(ArrayList<String> treeList: playedGameTreeList ) {
 					matched = true;
-					int length = 0;
-					if(subList.size() > treeList.size()) {
-						length = treeList.size();
-					}else {
-						length = subList.size();
-					}
-					for(int i=0;i<length;i++) {
-						if(!treeList.get(i).split("\\(")[0].equalsIgnoreCase(subList.get(i))) {
-							matched = false;
-							break;
+//					int length = 0;
+//					if(subList.size() > treeList.size()) {
+//						length = treeList.size();
+//					}else {
+//						length = subList.size();
+//					}
+					if(treeList.size()>=subList.size()) {
+						for(int i=0;i<subList.size();i++) {
+							if(!treeList.get(i).split("\\(")[0].equalsIgnoreCase(subList.get(i))) {
+								matched = false;
+								break;
+							}
 						}
+					}else {
+						matched = false;
 					}
 					if(matched) {
 						tempTreeList = treeList;
@@ -824,7 +1236,7 @@ public class GameController {
 						result = "You can add Node: " + tempNextNode + " to the current branch i.e. ";
 						StringBuffer buffer = new StringBuffer();
 						for(int i=0; i<subList.size();i++) {
-							buffer.append(tempTreeList.get(i));
+							buffer.append(subList.get(i));
 							if(i != subList.size()-1) {
 								buffer.append("-->");
 							}
@@ -834,9 +1246,9 @@ public class GameController {
 						break;
 					}
 				}
-				if(subList.size() == 2 && gameStart.equalsIgnoreCase("Proponent")) {
+				if(subList.size() == 2 && gameStart.equalsIgnoreCase("User")) {
 					break;
-				}else if(subList.size() == 1 && gameStart.equalsIgnoreCase("Opponent")) {
+				}else if(subList.size() == 1 && gameStart.equalsIgnoreCase("Computer")) {
 					break;
 				}else if(subList.size()%2 == validLength) {
 					tempNextNode = subList.get(subList.size()-1);
