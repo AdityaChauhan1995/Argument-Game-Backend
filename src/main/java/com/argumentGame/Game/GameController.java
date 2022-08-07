@@ -104,15 +104,7 @@ public class GameController {
 			}
 			count++;
 		}
-//		int evenRows = 0;
-//		for(ArrayList<String> treeList: playedGameTreeList ) {
-//			if(treeList.size()%2==0) {
-//				evenRows++;
-//			}
-//		}
-//		if(evenRows == playedGameTreeList.size()) {
-//			result = 0;
-//		}
+
 		int validLength = 0;
 		if(gameStart.equalsIgnoreCase("User")) {
 			validLength = 0;
@@ -189,10 +181,6 @@ public class GameController {
 			validPropLength = 1;
 			validOppLength = 0;
 		}
-//		else {
-//			validPropLength = 0;
-//			validOppLength = 1;
-//		}
 		
 		ArrayList<ArrayList<String>> proWinsList = new ArrayList<ArrayList<String>>();
 		
@@ -299,10 +287,6 @@ public class GameController {
 			validPropLength = 1;
 			validOppLength = 0;
 		}
-//		else {
-//			validPropLength = 0;
-//			validOppLength = 1;
-//		}
 		
 		int index = 0;
 		ArrayList<ArrayList<String>> proWins = new ArrayList<ArrayList<String>>(); 
@@ -318,7 +302,6 @@ public class GameController {
 		String message = null;
 		if(newProponentWinCount>proponentWinCount) {
 			boolean result = compareCompleteWinningStratergy(proWins,completeWinningList);
-//			System.out.println("Result of compareCompleteWinningStratergy : " + String.valueOf(result));
 			if(result) {
 				message = "Proponent Wins !!!";
 			}else {
@@ -557,13 +540,9 @@ public class GameController {
 	}
 	
 	ArrayList<ArrayList<String>> sortListOfList(ArrayList<ArrayList<String>> gameTreeList, String order){
-//		ArrayList<Integer> indexes = new ArrayList<Integer>();
-//		ArrayList<Integer> length = new ArrayList<Integer>();
 		Map<Integer,Integer> map = new HashMap<Integer, Integer>();
 		int count =0;
 		for(ArrayList<String> list: gameTreeList) {
-//			indexes.add(count);
-//			length.add(list.size());
 			map.put(count, list.size());
 			count++;
 		}
@@ -610,25 +589,7 @@ public class GameController {
 	}
 	
 	ArrayList<ArrayList<ArrayList<String>>> getWinningSubtrees(ArrayList<ArrayList<String>> gameTreeList){
-		
-//		gameTreeList = new ArrayList<ArrayList<String>>();
-//		ArrayList<String> example1 = new ArrayList<String>(Arrays.asList("3","4","7"));
-//		ArrayList<String> example2 = new ArrayList<String>(Arrays.asList("3","1","5"));
-//		ArrayList<String> example3 = new ArrayList<String>(Arrays.asList("3","2","3","5"));
-//		ArrayList<String> example4 = new ArrayList<String>(Arrays.asList("3","2","4","1","6"));
-//		ArrayList<String> example5 = new ArrayList<String>(Arrays.asList("3","1","3","5","8","6"));
-//		ArrayList<String> example6 = new ArrayList<String>(Arrays.asList("3","1","3","5","1","7"));
-//		ArrayList<String> example7 = new ArrayList<String>(Arrays.asList("3","1","3","2","3","5","4"));
-//		ArrayList<String> example8 = new ArrayList<String>(Arrays.asList("3","1","3","2","3","6","7"));
-//		gameTreeList.add(example1);
-//		gameTreeList.add(example2);
-//		gameTreeList.add(example3);
-//		gameTreeList.add(example4);
-//		gameTreeList.add(example5);
-//		gameTreeList.add(example6);
-//		gameTreeList.add(example7);
-//		gameTreeList.add(example8);
-		
+			
 		ArrayList<ArrayList<String>> winningSubTrees = helperWinningSubTrees(gameTreeList);
 		
 		ArrayList<ArrayList<ArrayList<String>>> completeWinningList = new ArrayList<ArrayList<ArrayList<String>>>();
@@ -675,11 +636,6 @@ public class GameController {
 								tempMatchedSubList.get(z).add(tempWinningSub);
 							}
 						}
-//						tempMatchedSubList.add(tempWinningSub);
-//						ArrayList<String> tempWinShortList = new ArrayList<String>(winShortList);
-//						tempWinShortList.add(tempNextNode);
-//						ArrayList<String> tempWinningSub2 = new ArrayList<String>(tempWinningSub.subList(0, winShortList.size()+1));
-//						completeWinningList = addInCompleteWinningList(completeWinningList,index,tempWinShortList,tempWinningSub2);
 					}
 				}
 				if(!tempMatchedSubList.isEmpty()) {
@@ -898,47 +854,32 @@ public class GameController {
 	
 	@RequestMapping(path= "/", method = RequestMethod.GET)
 	public String getList() {
-//		String sql = "SELECT count(*) FROM `argument-games-db`.`argument-game-table`";
-//		int result = jdbcTemplate.queryForObject(sql, Integer.class);
-//		String nodeJson = "[{\"width\":150,\"height\":42,\"id\":\"1\",\"data\":{\"label\":\"Node 1\"},\"position\":{\"x\":86.00000000000006,\"y\":129.99999999999994},\"positionAbsolute\":{\"x\":86.00000000000006,\"y\":129.99999999999994},\"selected\":true,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"2\",\"data\":{\"label\":\"Node 2\"},\"position\":{\"x\":251.99999999999991,\"y\":53.00000000000003},\"positionAbsolute\":{\"x\":251.99999999999991,\"y\":53.00000000000003},\"selected\":false,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"3\",\"position\":{\"x\":162.67434199207776,\"y\":249.99999999999997},\"data\":{\"label\":\"Node 3\"},\"positionAbsolute\":{\"x\":162.67434199207776,\"y\":249.99999999999997},\"selected\":false,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"4\",\"position\":{\"x\":445.90017163032684,\"y\":-30.99999999999995},\"data\":{\"label\":\"Node 4\"},\"positionAbsolute\":{\"x\":445.90017163032684,\"y\":-30.99999999999995},\"selected\":false,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"5\",\"position\":{\"x\":-90.10046317682334,\"y\":207.99999999999997},\"data\":{\"label\":\"Node 5\"},\"positionAbsolute\":{\"x\":-90.10046317682334,\"y\":207.99999999999997},\"selected\":false,\"dragging\":false}]";
-//		String edgesJson = "[{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"id\":\"e2-1\",\"source\":\"2\",\"target\":\"1\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"4\",\"sourceHandle\":null,\"target\":\"2\",\"targetHandle\":null,\"id\":\"reactflow__edge-4-2\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"1\",\"sourceHandle\":null,\"target\":\"5\",\"targetHandle\":null,\"id\":\"reactflow__edge-1-5\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"1\",\"sourceHandle\":null,\"target\":\"3\",\"targetHandle\":null,\"id\":\"reactflow__edge-1-3\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"3\",\"sourceHandle\":null,\"target\":\"1\",\"targetHandle\":null,\"id\":\"reactflow__edge-3-1\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"3\",\"sourceHandle\":null,\"target\":\"2\",\"targetHandle\":null,\"id\":\"reactflow__edge-3-2\"}]";
-//		String sql = "INSERT INTO `argument-games-db`.`argument-game-table` (NodesJson, EdgesJson, Nodes, Edges) VALUES (" + 
-//					 "'" + nodeJson + "', " + "'" + edgesJson + "',null,null)";
-//		
-//		int result = jdbcTemplate.update(sql);
-//		String sql1 = "TRUNCATE `argument-games-db`.`argument-game-table` ";
-//		jdbcTemplate.execute(sql1);
 		return String.valueOf(101);
 	}
 	
 	@RequestMapping(path= "/getInitialMap", method = RequestMethod.GET)
-	public ResponseEntity<RequestBodySaveMap> getInitialMap() {
-//		String nodesJson = "[{\"width\":150,\"height\":42,\"id\":\"1\",\"data\":{\"label\":\"Node 1\"},\"position\":{\"x\":86.00000000000006,\"y\":129.99999999999994},\"positionAbsolute\":{\"x\":86.00000000000006,\"y\":129.99999999999994},\"selected\":true,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"2\",\"data\":{\"label\":\"Node 2\"},\"position\":{\"x\":251.99999999999991,\"y\":53.00000000000003},\"positionAbsolute\":{\"x\":251.99999999999991,\"y\":53.00000000000003},\"selected\":false,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"3\",\"position\":{\"x\":162.67434199207776,\"y\":249.99999999999997},\"data\":{\"label\":\"Node 3\"},\"positionAbsolute\":{\"x\":162.67434199207776,\"y\":249.99999999999997},\"selected\":false,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"4\",\"position\":{\"x\":445.90017163032684,\"y\":-30.99999999999995},\"data\":{\"label\":\"Node 4\"},\"positionAbsolute\":{\"x\":445.90017163032684,\"y\":-30.99999999999995},\"selected\":false,\"dragging\":false},{\"width\":150,\"height\":42,\"id\":\"5\",\"position\":{\"x\":-90.10046317682334,\"y\":207.99999999999997},\"data\":{\"label\":\"Node 5\"},\"positionAbsolute\":{\"x\":-90.10046317682334,\"y\":207.99999999999997},\"selected\":false,\"dragging\":false}]";
-//		String edgesJson = "[{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"id\":\"e2-1\",\"source\":\"2\",\"target\":\"1\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"4\",\"sourceHandle\":null,\"target\":\"2\",\"targetHandle\":null,\"id\":\"reactflow__edge-4-2\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"1\",\"sourceHandle\":null,\"target\":\"5\",\"targetHandle\":null,\"id\":\"reactflow__edge-1-5\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"1\",\"sourceHandle\":null,\"target\":\"3\",\"targetHandle\":null,\"id\":\"reactflow__edge-1-3\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"3\",\"sourceHandle\":null,\"target\":\"1\",\"targetHandle\":null,\"id\":\"reactflow__edge-3-1\"},{\"animated\":false,\"style\":{\"stroke\":\"black\"},\"source\":\"3\",\"sourceHandle\":null,\"target\":\"2\",\"targetHandle\":null,\"id\":\"reactflow__edge-3-2\"}]";
-//		String sql = "INSERT INTO `argument-games-db`.`argument-game-table` (NodesJson, EdgesJson, Nodes, Edges) VALUES (" + 
-//					 "'" + nodesJson + "', " + "'" + edgesJson + "',null,null)";
-//		String edgesJson = "[{\"id\": \"e2-1\", \"style\": {\"stroke\": \"black\"}, \"source\": \"2\", \"target\": \"1\", \"animated\": false}, {\"id\": \"reactflow__edge-4-2\", \"style\": {\"stroke\": \"black\"}, \"source\": \"4\", \"target\": \"2\", \"animated\": false, \"sourceHandle\": null, \"targetHandle\": null}, {\"id\": \"reactflow__edge-1-5\", \"style\": {\"stroke\": \"black\"}, \"source\": \"1\", \"target\": \"5\", \"animated\": false, \"sourceHandle\": null, \"targetHandle\": null}, {\"id\": \"reactflow__edge-1-3\", \"style\": {\"stroke\": \"black\"}, \"source\": \"1\", \"target\": \"3\", \"animated\": false, \"sourceHandle\": null, \"targetHandle\": null}, {\"id\": \"reactflow__edge-3-1\", \"style\": {\"stroke\": \"black\"}, \"source\": \"3\", \"target\": \"1\", \"animated\": false, \"sourceHandle\": null, \"targetHandle\": null}, {\"id\": \"reactflow__edge-3-2\", \"style\": {\"stroke\": \"black\"}, \"source\": \"3\", \"target\": \"2\", \"animated\": false, \"sourceHandle\": null, \"targetHandle\": null}]";
-//		String nodesJson = "[{\"id\": \"1\", \"data\": {\"label\": \"Node 1\"}, \"width\": 150, \"height\": 42, \"dragging\": false, \"position\": {\"x\": 86.00000000000006, \"y\": 129.99999999999994}, \"selected\": true, \"positionAbsolute\": {\"x\": 86.00000000000006, \"y\": 129.99999999999994}}, {\"id\": \"2\", \"data\": {\"label\": \"Node 2\"}, \"width\": 150, \"height\": 42, \"dragging\": false, \"position\": {\"x\": 251.99999999999991, \"y\": 53.00000000000003}, \"selected\": false, \"positionAbsolute\": {\"x\": 251.99999999999991, \"y\": 53.00000000000003}}, {\"id\": \"3\", \"data\": {\"label\": \"Node 3\"}, \"width\": 150, \"height\": 42, \"dragging\": false, \"position\": {\"x\": 162.67434199207776, \"y\": 249.99999999999997}, \"selected\": false, \"positionAbsolute\": {\"x\": 162.67434199207776, \"y\": 249.99999999999997}}, {\"id\": \"4\", \"data\": {\"label\": \"Node 4\"}, \"width\": 150, \"height\": 42, \"dragging\": false, \"position\": {\"x\": 445.9001716303269, \"y\": -30.99999999999995}, \"selected\": false, \"positionAbsolute\": {\"x\": 445.9001716303269, \"y\": -30.99999999999995}}, {\"id\": \"5\", \"data\": {\"label\": \"Node 5\"}, \"width\": 150, \"height\": 42, \"dragging\": false, \"position\": {\"x\": -90.10046317682334, \"y\": 207.99999999999997}, \"selected\": false, \"positionAbsolute\": {\"x\": -90.10046317682334, \"y\": 207.99999999999997}}]";
-
-		String sql = "SELECT NodesJson,EdgesJson FROM `argument-games-db`.`argument-game-table` ";
+	public ResponseEntity<RequestBodySaveMap> getInitialMap() {	
+		String sql = "SELECT NodesJson,EdgesJson FROM `argument_games`.`argument-game-table` ";
 		List<RequestBodySaveMap> value = jdbcTemplate.query(sql,new ArgumentGameMapper());
-//		List<RequestBodySaveMap> value = new ArrayList<RequestBodySaveMap>();
-//		RequestBodySaveMap temp = new RequestBodySaveMap();
-//		temp.setNodes(nodesJson);
-//		temp.setEdges(edgesJson);
-//		value.add(temp);
-		return ResponseEntity.status(HttpStatus.OK).body(value.get(0));
+		if(value != null && !value.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.OK).body(value.get(0));
+		}else {
+			RequestBodySaveMap tempValue = new RequestBodySaveMap();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(tempValue);
+		}
+		
 	}
 	
 	@RequestMapping(path= "/saveMap", method = RequestMethod.POST, consumes="application/json")
 	public ResponseEntity<String> saveMap(@RequestBody RequestBodySaveMap value) {
-		String sql1 = "TRUNCATE `argument-games-db`.`argument-game-table` ";
+		String sql1 = "TRUNCATE `argument_games`.`argument-game-table` ";
 		jdbcTemplate.execute(sql1);
 		
 		String nodeJson = value.getNodes();
 		String edgesJson = value.getEdges();
-		String sql = "INSERT INTO `argument-games-db`.`argument-game-table` (NodesJson, EdgesJson, Nodes, Edges) VALUES (" + 
-					 "'" + nodeJson + "', " + "'" + edgesJson + "',null,null)";
+		
+		String sql = "INSERT INTO `argument_games`.`argument-game-table` (NodesJson, EdgesJson) VALUES (" + 
+				 "'" + nodeJson + "', " + "'" + edgesJson + "')";
 		int result = jdbcTemplate.update(sql);
 		if(result != 0) {
 			return ResponseEntity.status(HttpStatus.OK).body("Saved");
@@ -961,7 +902,6 @@ public class GameController {
 				map.put(edge.getSource(), temp + "," +edge.getTarget());
 			}
 		}
-//		System.out.println(map);
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 	
@@ -969,10 +909,12 @@ public class GameController {
 	public ResponseEntity<ArrayList<ArrayList<String>>> getGameList(@RequestBody RequestBodyPassed value) {
 		ArrayList<ArrayList<String> > aList =  new ArrayList<ArrayList<String>>();
 		HashMap<String,String> map = value.getGameTreeMap();
+		if(map == null || map.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.OK).body(aList);
+		}
 		String initialNode = value.getInitialNode();
 		String gameStart = value.getGameStart();
 		int x = 1, position = 1;
-//		if(gameStart.equalsIgnoreCase("User")) {
 			if(value.getGameType().equalsIgnoreCase("Preferred")) {
 				x=0;
 				position = 1;
@@ -980,17 +922,6 @@ public class GameController {
 				x=1;
 				position = 0;
 			}
-//		}
-//		else {
-//			if(value.getGameType().equalsIgnoreCase("Preferred")) {
-//				x=1;
-//				position = 0;
-//			}else if(value.getGameType().equalsIgnoreCase("Grounded")) {
-//				x=0;
-//				position = 1;
-//			}
-//		}
-		
 		
 		ArrayList<String> firstRow = new ArrayList<String>();
 		firstRow.add(initialNode);
@@ -1048,7 +979,6 @@ public class GameController {
 			index++;
 		}
 		aList = sortListOfList(aList,"asc");
-		ArrayList<ArrayList<ArrayList<String>>> completeWinningList = getWinningSubtrees(aList);
 		return ResponseEntity.status(HttpStatus.OK).body(aList);
 	}
 	
@@ -1063,11 +993,65 @@ public class GameController {
 		ArrayList<ArrayList<String>> gameTreeList = validateRequest.getGameTreeList();
 		int proponentWinCount = validateRequest.getProponentWinCount();
 		int opponentWinCount = validateRequest.getOpponentWinCount();
+		ValidateResponse validateResponse = new ValidateResponse();
+		
+		int gameTreeListLength = -1;
+		if(gameTreeList != null || !gameTreeList.isEmpty()) {
+			 gameTreeListLength = 0;
+			for(ArrayList<String> treeList:gameTreeList) {
+				gameTreeListLength = gameTreeListLength + treeList.size();
+			}
+		}
+		if(gameTreeListLength != -1 && gameTreeListLength == 1) {
+			if(nodes.size()>1) {
+				validateResponse.setResult(false);
+				validateResponse.setExceptionMessage("Invalid Move");
+				return ResponseEntity.status(HttpStatus.OK).body(validateResponse);
+			}else {
+				if(!nodes.get(0).getId().equalsIgnoreCase(gameTreeList.get(0).get(0))) {
+					validateResponse.setResult(false);
+					validateResponse.setExceptionMessage("Invalid Move");
+					return ResponseEntity.status(HttpStatus.OK).body(validateResponse);
+				}else if(nodes.size()<=1){
+					validateResponse.setResult(true);
+					validateResponse.setWin("Game Over");
+					validateResponse.setMessage("Proponent Wins !!! and Game Finished \n"+ "Node " +initialNode +" will be included in "
+							+ gameType + " game.\n\n"+ "Winning Statergy for proponent is :-\n1) "+ initialNode + " ;" );
+					validateResponse.setProponentWinCount(1);
+					validateResponse.setOpponentWinCount(0);
+					return ResponseEntity.status(HttpStatus.OK).body(validateResponse);
+				}
+			}
+		}else if(gameTreeListLength == -1 || gameTreeListLength == 0) {
+			validateResponse.setResult(false);
+			validateResponse.setExceptionMessage("Invalid Move");
+			return ResponseEntity.status(HttpStatus.OK).body(validateResponse);
+		}
+		
+		//checking all connections made in Argument game
+		if(gameTreeListLength >1 && nodes.size()>1) {
+			boolean notPresent = false;
+			for(Nodes tempNode: nodes) {
+				notPresent = false;
+				for(Edges tempEdges:edges) {
+					if(tempEdges.getTarget().equalsIgnoreCase(tempNode.getId()) || tempEdges.getSource().equalsIgnoreCase(tempNode.getId())) {
+						notPresent = true;
+					}
+				}
+				if(!notPresent) {
+					break;
+				}
+			}
+			if(!notPresent) {
+				validateResponse.setResult(false);
+				validateResponse.setExceptionMessage("Invalid Move");
+				return ResponseEntity.status(HttpStatus.OK).body(validateResponse);
+			}
+		}
 		
 		ArrayList<ArrayList<ArrayList<String>>> completeWinningList = getWinningSubtrees(gameTreeList);
-		
+
 		ArrayList<ArrayList<String>> playedGameTreeList = new ArrayList<ArrayList<String>>();
-		
 		HashMap<String,String> map = new HashMap<String, String>();
 		for(Edges edge:edges) {
 			if(map.get(edge.getSource()) == null) {
@@ -1082,8 +1066,6 @@ public class GameController {
 		playedGameTreeList = sortListOfList(playedGameTreeList,"desc");
 		int result = compareTreeList(gameTreeList,playedGameTreeList,lastNodeAdded,gameStart);
 		boolean lengthMatched = compareLength(gameTreeList,playedGameTreeList);
-//		String winningStatergy = getWinningStatergy(playedGameTreeList);
-		ValidateResponse validateResponse = new ValidateResponse();
 		
 		if(result == -1 && lengthMatched) {
 			validateResponse.setResult(true);
@@ -1095,7 +1077,7 @@ public class GameController {
 				validateResponse.setProponentWinCount(Integer.valueOf(message.split(";")[1]));
 				validateResponse.setOpponentWinCount(Integer.valueOf(message.split(";")[2]));
 			}else if(message != null && message.split(";")[0].equalsIgnoreCase("null")) {
-				validateResponse.setMessage(null);
+				validateResponse.setMessage("Game Finished but no winning strategy found.");
 				validateResponse.setProponentWinCount(Integer.valueOf(message.split(";")[1]));
 				validateResponse.setOpponentWinCount(Integer.valueOf(message.split(";")[2]));
 			}
@@ -1118,8 +1100,8 @@ public class GameController {
 				validateResponse.setWin("Game Won");
 			}
 			String message = getMessage(playedGameTreeList,gameTreeList,opponentWinCount, proponentWinCount,gameStart,completeWinningList);
+			boolean lengthEqual = compareLength(gameTreeList,playedGameTreeList);
 			if(message != null && !message.split(";")[0].equalsIgnoreCase("null")) {
-				boolean lengthEqual = compareLength(gameTreeList,playedGameTreeList);
 				if(lengthEqual) {
 					validateResponse.setMessage(message.split(";")[0] + " and Game Finished \n"+ "Node " +initialNode +" will be included in "
 																	+ gameType + " game.\n" +  getWinningStatergy(playedGameTreeList,gameTreeList,gameStart));
@@ -1132,9 +1114,22 @@ public class GameController {
 					validateResponse.setOpponentWinCount(Integer.valueOf(message.split(";")[2]));
 				}
 			}else if(message != null && message.split(";")[0].equalsIgnoreCase("null")) {
-				validateResponse.setMessage(null);
+				if(lengthEqual) {
+					validateResponse.setMessage("Game Finished but no winning strategy found.");
+				}else {
+					validateResponse.setMessage(null);
+				}
 				validateResponse.setProponentWinCount(Integer.valueOf(message.split(";")[1]));
 				validateResponse.setOpponentWinCount(Integer.valueOf(message.split(";")[2]));
+			}
+			if(nextMove.equalsIgnoreCase("")) {
+				if(validateResponse.getMessage() == null) {
+					validateResponse.setMessage("Computer has zero next moves left. If possible, user can explore other paths if he/she wishes to.");
+				}else if(!validateResponse.getMessage().contains("Finished")) {
+					String value = validateResponse.getMessage();
+					validateResponse.setMessage(value + "\n\nComputer has zero next moves left. If possible, user can explore other paths if he/she wishes to.");
+				}
+				
 			}
 		}else if(result != -1 ) {
 			validateResponse.setResult(false);
@@ -1190,7 +1185,7 @@ public class GameController {
 		gameTreeList = new ArrayList<ArrayList<String>>(tempGameTreeList); 
 		
 		ArrayList<String> allMatched = new ArrayList<String>();
-//		int index=0, maxSameLength = 0;
+
 		String result = "";
 		String tempNextNode = null;
 		ArrayList<String> subList = new ArrayList<String>();
@@ -1210,12 +1205,7 @@ public class GameController {
 				boolean matched = true;
 				for(ArrayList<String> treeList: playedGameTreeList ) {
 					matched = true;
-//					int length = 0;
-//					if(subList.size() > treeList.size()) {
-//						length = treeList.size();
-//					}else {
-//						length = subList.size();
-//					}
+
 					if(treeList.size()>=subList.size()) {
 						for(int i=0;i<subList.size();i++) {
 							if(!treeList.get(i).split("\\(")[0].equalsIgnoreCase(subList.get(i))) {
