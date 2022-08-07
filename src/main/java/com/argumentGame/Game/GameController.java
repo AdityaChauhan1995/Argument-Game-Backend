@@ -668,7 +668,9 @@ public class GameController {
 			}else {
 				oppWinGames.add(treeList);
 			}
-			oppFirstMoves.add(treeList.get(1));
+			if(treeList.size()>1) {
+				oppFirstMoves.add(treeList.get(1));
+			}
 		}
 		ArrayList<ArrayList<String>> excludedSubTrees = new ArrayList<ArrayList<String>>();
 		ArrayList<ArrayList<String>> winningSubTrees = new ArrayList<ArrayList<String>>();
@@ -990,8 +992,34 @@ public class GameController {
 		ArrayList<ArrayList<String>> gameTreeList = validateRequest.getGameTreeList();
 		int proponentWinCount = validateRequest.getProponentWinCount();
 		int opponentWinCount = validateRequest.getOpponentWinCount();
+		ArrayList<Nodes> playedGameNodes = validateRequest.getPlayedGameNodes();
 		ValidateResponse validateResponse = new ValidateResponse();
 		
+		int gameTreeListLength = 0;
+		for(ArrayList<String> treeList:gameTreeList) {
+			gameTreeListLength = gameTreeListLength + treeList.size();
+		}
+		
+		if(gameTreeListLength == 1) {
+			boolean nodePresent =false;
+			for(Nodes tempNode:playedGameNodes) {
+				if(tempNode.getId().equalsIgnoreCase(lastNodeAdded.split("\\(")[0])) {
+					nodePresent = true;
+				}
+			}
+			if(nodePresent) {
+				validateResponse.setResult(true);
+				validateResponse.setWin("Game Over");
+				validateResponse.setMessage("Proponent Wins !!! and Game Finished ");
+				validateResponse.setProponentWinCount(1);
+				validateResponse.setOpponentWinCount(0);
+				return ResponseEntity.status(HttpStatus.OK).body(validateResponse);
+			}else {
+				validateResponse.setResult(false);
+				validateResponse.setExceptionMessage("Invalid Move");
+				return ResponseEntity.status(HttpStatus.OK).body(validateResponse);
+			}
+		}
 		
 		//checking all connections made in Argument game
 		if(nodes.size()>1) {

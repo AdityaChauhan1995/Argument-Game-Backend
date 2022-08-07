@@ -14,6 +14,13 @@ public class ValidateRequest {
 	public int opponentWinCount;
 	public String gameStart;
 	public String gameType;
+	public ArrayList<Nodes> playedGameNodes;
+	public ArrayList<Nodes> getPlayedGameNodes() {
+		return playedGameNodes;
+	}
+	public void setPlayedGameNodes(ArrayList<Nodes> playedGameNodes) {
+		this.playedGameNodes = playedGameNodes;
+	}
 	public String getGameType() {
 		return gameType;
 	}
