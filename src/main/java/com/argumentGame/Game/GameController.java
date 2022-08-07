@@ -909,9 +909,6 @@ public class GameController {
 	public ResponseEntity<ArrayList<ArrayList<String>>> getGameList(@RequestBody RequestBodyPassed value) {
 		ArrayList<ArrayList<String> > aList =  new ArrayList<ArrayList<String>>();
 		HashMap<String,String> map = value.getGameTreeMap();
-		if(map == null || map.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.OK).body(aList);
-		}
 		String initialNode = value.getInitialNode();
 		String gameStart = value.getGameStart();
 		int x = 1, position = 1;
@@ -995,41 +992,9 @@ public class GameController {
 		int opponentWinCount = validateRequest.getOpponentWinCount();
 		ValidateResponse validateResponse = new ValidateResponse();
 		
-		int gameTreeListLength = -1;
-		if(gameTreeList != null || !gameTreeList.isEmpty()) {
-			 gameTreeListLength = 0;
-			for(ArrayList<String> treeList:gameTreeList) {
-				gameTreeListLength = gameTreeListLength + treeList.size();
-			}
-		}
-		if(gameTreeListLength != -1 && gameTreeListLength == 1) {
-			if(nodes.size()>1) {
-				validateResponse.setResult(false);
-				validateResponse.setExceptionMessage("Invalid Move");
-				return ResponseEntity.status(HttpStatus.OK).body(validateResponse);
-			}else {
-				if(!nodes.get(0).getId().equalsIgnoreCase(gameTreeList.get(0).get(0))) {
-					validateResponse.setResult(false);
-					validateResponse.setExceptionMessage("Invalid Move");
-					return ResponseEntity.status(HttpStatus.OK).body(validateResponse);
-				}else if(nodes.size()<=1){
-					validateResponse.setResult(true);
-					validateResponse.setWin("Game Over");
-					validateResponse.setMessage("Proponent Wins !!! and Game Finished \n"+ "Node " +initialNode +" will be included in "
-							+ gameType + " game.\n\n"+ "Winning Statergy for proponent is :-\n1) "+ initialNode + " ;" );
-					validateResponse.setProponentWinCount(1);
-					validateResponse.setOpponentWinCount(0);
-					return ResponseEntity.status(HttpStatus.OK).body(validateResponse);
-				}
-			}
-		}else if(gameTreeListLength == -1 || gameTreeListLength == 0) {
-			validateResponse.setResult(false);
-			validateResponse.setExceptionMessage("Invalid Move");
-			return ResponseEntity.status(HttpStatus.OK).body(validateResponse);
-		}
 		
 		//checking all connections made in Argument game
-		if(gameTreeListLength >1 && nodes.size()>1) {
+		if(nodes.size()>1) {
 			boolean notPresent = false;
 			for(Nodes tempNode: nodes) {
 				notPresent = false;
